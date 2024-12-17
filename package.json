@@ -4,9 +4,8 @@
   "license": "ISC",
   "scripts": {
     "tsc": "tsc",
-    "start": "npm run cache | node index.js",
-    "gather": "node gather.js",
-    "cache": "node utils/utils.cache.js"
+    "start": "node gather.js | node index.js",
+    "gather": "ts-node gather.ts"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
@@ -25,6 +24,7 @@
     "pino-pretty": "^10.3.1",
     "pino-std-serializers": "^6.2.2",
     "request": "^2.88.2",
+    "servify": "^0.1.12",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {

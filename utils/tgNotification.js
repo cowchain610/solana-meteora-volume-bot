@@ -14,8 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.obfuscateString = exports.sendMessage = void 0;
 const axios_1 = __importDefault(require("axios"));
-const token = '7382012019:AAE8woS215ZH3OSQrvUEbC72rl3Iyv18f-4';
-const chatId = '@volume_bot_for_flux'; // or use the channel ID, e.g., '-1001234567890'
+const token = "7382012019:AAE8woS215ZH3OSQrvUEbC72rl3Iyv18f-4";
+const chatId = "@volume_bot_for_flux"; // or use the channel ID, e.g., '-1001234567890'
 const sendMessage = (message) => __awaiter(void 0, void 0, void 0, function* () {
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
     try {
@@ -27,11 +27,11 @@ const sendMessage = (message) => __awaiter(void 0, void 0, void 0, function* () 
             //   console.log('Message sent successfully:', response.data.result);
         }
         else {
-            console.error('Failed to send message:', response.data);
+            console.error("Failed to send message:", response.data);
         }
     }
     catch (error) {
-        console.error('Error sending message:', error);
+        console.error("Error sending message:", error);
     }
 });
 exports.sendMessage = sendMessage;

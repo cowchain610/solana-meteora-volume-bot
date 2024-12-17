@@ -1,7 +1,7 @@
-import { SLIPPAGE } from '../constants';
+import { SLIPPAGE } from "../constants";
 // import { sendMessage } from './tgNotification';
 
-import assert from 'assert';
+import assert from "assert";
 
 import {
   jsonInfo2PoolKeys,
@@ -20,13 +20,13 @@ import {
   TxVersion,
   buildSimpleTransaction,
   LOOKUP_TABLE_CACHE,
-} from '@raydium-io/raydium-sdk';
+} from "@raydium-io/raydium-sdk";
 
-import { PublicKey, Keypair, Connection, VersionedTransaction } from '@solana/web3.js';
+import { PublicKey, Keypair, Connection, VersionedTransaction } from "@solana/web3.js";
 
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
-import { logger } from '.';
-import { TOKEN_MINT, TX_FEE } from '../constants';
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, getMint } from "@solana/spl-token";
+import { logger } from ".";
+import { TOKEN_MINT, TX_FEE } from "../constants";
 // import base58 from 'bs58';
 // import { BN } from 'bn.js';
 
@@ -54,7 +54,7 @@ async function getWalletTokenAccount(connection: Connection, wallet: PublicKey):
 async function swapOnlyAmm(connection: Connection, input: TestTxInputInfo) {
   // -------- pre-action: get pool info --------
   const targetPoolInfo = await formatAmmKeysById(connection, input.targetPool);
-  assert(targetPoolInfo, 'cannot find the target pool');
+  assert(targetPoolInfo, "cannot find the target pool");
   const poolKeys = jsonInfo2PoolKeys(targetPoolInfo) as LiquidityPoolKeys;
 
   // -------- step 1: coumpute amount out --------
@@ -76,7 +76,7 @@ async function swapOnlyAmm(connection: Connection, input: TestTxInputInfo) {
     },
     amountIn: input.inputTokenAmount,
     amountOut: minAmountOut,
-    fixedSide: 'in',
+    fixedSide: "in",
     makeTxVersion: TxVersion.V0,
     computeBudgetConfig: {
       microLamports: 12_000 * TX_FEE,
@@ -88,17 +88,17 @@ async function swapOnlyAmm(connection: Connection, input: TestTxInputInfo) {
 
 export async function formatAmmKeysById(connection: Connection, id: string): Promise<ApiPoolInfoV4> {
   const account = await connection.getAccountInfo(new PublicKey(id));
-  if (account === null) throw Error(' get id info error ');
+  if (account === null) throw Error(" get id info error ");
   const info = LIQUIDITY_STATE_LAYOUT_V4.decode(account.data);
 
   const marketId = info.marketId;
   const marketAccount = await connection.getAccountInfo(marketId);
-  if (marketAccount === null) throw Error(' get market info error');
+  if (marketAccount === null) throw Error(" get market info error");
   const marketInfo = MARKET_STATE_LAYOUT_V3.decode(marketAccount.data);
 
   const lpMint = info.lpMint;
   const lpMintAccount = await connection.getAccountInfo(lpMint);
-  if (lpMintAccount === null) throw Error(' get lp mint info error');
+  if (lpMintAccount === null) throw Error(" get lp mint info error");
   const lpMintInfo = SPL_MINT_LAYOUT.decode(lpMintAccount.data);
 
   return {
@@ -244,14 +244,14 @@ export const getBuyTxWithJupiter = async (wallet: Keypair, baseMint: PublicKey, 
       )
     ).json();
 
-    console.log('quoteResponse: ', quoteResponse);
+    console.log("quoteResponse: ", quoteResponse);
 
     // get serialized transactions for the swap
     const { swapTransaction } = await (
-      await fetch('https://quote-api.jup.ag/v6/swap', {
-        method: 'POST',
+      await fetch("https://quote-api.jup.ag/v6/swap", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           quoteResponse,
@@ -264,14 +264,14 @@ export const getBuyTxWithJupiter = async (wallet: Keypair, baseMint: PublicKey, 
     ).json();
 
     // deserialize the transaction
-    const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
+    const swapTransactionBuf = Buffer.from(swapTransaction, "base64");
     var transaction = VersionedTransaction.deserialize(swapTransactionBuf);
 
     // sign the transaction
     transaction.sign([wallet]);
     return transaction;
   } catch (error) {
-    console.log('Failed to get buy transaction');
+    console.log("Failed to get buy transaction");
     // sendMessage("Failed to get buy transaction")
     return null;
   }
@@ -287,10 +287,10 @@ export const getSellTxWithJupiter = async (wallet: Keypair, baseMint: PublicKey,
 
     // get serialized transactions for the swap
     const { swapTransaction } = await (
-      await fetch('https://quote-api.jup.ag/v6/swap', {
-        method: 'POST',
+      await fetch("https://quote-api.jup.ag/v6/swap", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           quoteResponse,
@@ -303,14 +303,14 @@ export const getSellTxWithJupiter = async (wallet: Keypair, baseMint: PublicKey,
     ).json();
 
     // deserialize the transaction
-    const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
+    const swapTransactionBuf = Buffer.from(swapTransaction, "base64");
     var transaction = VersionedTransaction.deserialize(swapTransactionBuf);
 
     // sign the transaction
     transaction.sign([wallet]);
     return transaction;
   } catch (error) {
-    console.log('Failed to get sell transaction', error);
+    console.log("Failed to get sell transaction", error);
     // sendMessage(`Failed to get sell transaction ${error}`)
     return null;
   }

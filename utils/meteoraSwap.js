@@ -39,11 +39,9 @@ const swapOnMeteora = (connection, wallet, amount, isBuy) => __awaiter(void 0, v
             minOutAmount: swapQuote.minOutAmount,
             outToken: isBuy ? dlmmPool.tokenY.publicKey : dlmmPool.tokenX.publicKey,
         });
-        // if(!isBuy) console.log(await connection.simulateTransaction(swapTx)) 
+        // if(!isBuy) console.log(await connection.simulateTransaction(swapTx))
         // console.log(await connection.simulateTransaction(swapTx))
-        const swapTxHash = yield (0, web3_js_1.sendAndConfirmTransaction)(connection, swapTx, [
-            wallet,
-        ]);
+        const swapTxHash = yield (0, web3_js_1.sendAndConfirmTransaction)(connection, swapTx, [wallet]);
         // console.log(`https://solscan.io/tx/${swapTxHash}`)
         return swapTxHash;
         // let versionedTx = await buildVersionedTx(

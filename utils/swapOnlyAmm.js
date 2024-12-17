@@ -12,7 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSellTxWithJupiter = exports.getBuyTxWithJupiter = exports.getSellTx = exports.getBuyTx = exports.formatAmmKeysById = void 0;
+exports.getSellTxWithJupiter = exports.getBuyTxWithJupiter = void 0;
+exports.formatAmmKeysById = formatAmmKeysById;
+exports.getBuyTx = getBuyTx;
+exports.getSellTx = getSellTx;
 const constants_1 = require("../constants");
 // import { sendMessage } from './tgNotification';
 const assert_1 = __importDefault(require("assert"));
@@ -36,7 +39,7 @@ function swapOnlyAmm(connection, input) {
     return __awaiter(this, void 0, void 0, function* () {
         // -------- pre-action: get pool info --------
         const targetPoolInfo = yield formatAmmKeysById(connection, input.targetPool);
-        (0, assert_1.default)(targetPoolInfo, 'cannot find the target pool');
+        (0, assert_1.default)(targetPoolInfo, "cannot find the target pool");
         const poolKeys = (0, raydium_sdk_1.jsonInfo2PoolKeys)(targetPoolInfo);
         // -------- step 1: coumpute amount out --------
         const { amountOut, minAmountOut } = raydium_sdk_1.Liquidity.computeAmountOut({
@@ -56,12 +59,12 @@ function swapOnlyAmm(connection, input) {
             },
             amountIn: input.inputTokenAmount,
             amountOut: minAmountOut,
-            fixedSide: 'in',
+            fixedSide: "in",
             makeTxVersion: raydium_sdk_1.TxVersion.V0,
             computeBudgetConfig: {
                 microLamports: 12000 * constants_2.TX_FEE,
-                units: 100000
-            }
+                units: 100000,
+            },
         });
         return innerTransactions;
     });
@@ -70,17 +73,17 @@ function formatAmmKeysById(connection, id) {
     return __awaiter(this, void 0, void 0, function* () {
         const account = yield connection.getAccountInfo(new web3_js_1.PublicKey(id));
         if (account === null)
-            throw Error(' get id info error ');
+            throw Error(" get id info error ");
         const info = raydium_sdk_1.LIQUIDITY_STATE_LAYOUT_V4.decode(account.data);
         const marketId = info.marketId;
         const marketAccount = yield connection.getAccountInfo(marketId);
         if (marketAccount === null)
-            throw Error(' get market info error');
+            throw Error(" get market info error");
         const marketInfo = raydium_sdk_1.MARKET_STATE_LAYOUT_V3.decode(marketAccount.data);
         const lpMint = info.lpMint;
         const lpMintAccount = yield connection.getAccountInfo(lpMint);
         if (lpMintAccount === null)
-            throw Error(' get lp mint info error');
+            throw Error(" get lp mint info error");
         const lpMintInfo = raydium_sdk_1.SPL_MINT_LAYOUT.decode(lpMintAccount.data);
         return {
             id,
@@ -102,17 +105,19 @@ function formatAmmKeysById(connection, id) {
             marketVersion: 3,
             marketProgramId: info.marketProgramId.toString(),
             marketId: info.marketId.toString(),
-            marketAuthority: raydium_sdk_1.Market.getAssociatedAuthority({ programId: info.marketProgramId, marketId: info.marketId }).publicKey.toString(),
+            marketAuthority: raydium_sdk_1.Market.getAssociatedAuthority({
+                programId: info.marketProgramId,
+                marketId: info.marketId,
+            }).publicKey.toString(),
             marketBaseVault: marketInfo.baseVault.toString(),
             marketQuoteVault: marketInfo.quoteVault.toString(),
             marketBids: marketInfo.bids.toString(),
             marketAsks: marketInfo.asks.toString(),
             marketEventQueue: marketInfo.eventQueue.toString(),
-            lookupTableAccount: web3_js_1.PublicKey.default.toString()
+            lookupTableAccount: web3_js_1.PublicKey.default.toString(),
         };
     });
 }
-exports.formatAmmKeysById = formatAmmKeysById;
 function getBuyTx(solanaConnection, wallet, baseMint, quoteMint, amount, targetPool) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -139,7 +144,7 @@ function getBuyTx(solanaConnection, wallet, baseMint, quoteMint, amount, targetP
                 makeTxVersion: raydium_sdk_1.TxVersion.V0,
                 payer: wallet.publicKey,
                 innerTransactions: instructions,
-                addLookupTableInfo: raydium_sdk_1.LOOKUP_TABLE_CACHE
+                addLookupTableInfo: raydium_sdk_1.LOOKUP_TABLE_CACHE,
             }))[0];
             if (willSendTx instanceof web3_js_1.VersionedTransaction) {
                 willSendTx.sign([wallet]);
@@ -152,7 +157,6 @@ function getBuyTx(solanaConnection, wallet, baseMint, quoteMint, amount, targetP
         }
     });
 }
-exports.getBuyTx = getBuyTx;
 function getSellTx(solanaConnection, wallet, baseMint, quoteMint, amount, targetPool) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -180,7 +184,7 @@ function getSellTx(solanaConnection, wallet, baseMint, quoteMint, amount, target
                 makeTxVersion: raydium_sdk_1.TxVersion.V0,
                 payer: wallet.publicKey,
                 innerTransactions: instructions,
-                addLookupTableInfo: raydium_sdk_1.LOOKUP_TABLE_CACHE
+                addLookupTableInfo: raydium_sdk_1.LOOKUP_TABLE_CACHE,
             }))[0];
             if (willSendTx instanceof web3_js_1.VersionedTransaction) {
                 willSendTx.sign([wallet]);
@@ -194,7 +198,6 @@ function getSellTx(solanaConnection, wallet, baseMint, quoteMint, amount, target
         }
     });
 }
-exports.getSellTx = getSellTx;
 const getBuyTxWithJupiter = (wallet, baseMint, amount) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const quoteResponse = yield (yield fetch(`https://quote-api.jup.ag/v6/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=${baseMint.toBase58()}&amount=${amount}&slippageBps=${constants_1.SLIPPAGE}`)).json();
@@ -210,7 +213,7 @@ const getBuyTxWithJupiter = (wallet, baseMint, amount) => __awaiter(void 0, void
                 userPublicKey: wallet.publicKey.toString(),
                 wrapAndUnwrapSol: true,
                 dynamicComputeUnitLimit: true,
-                prioritizationFeeLamports: 100000
+                prioritizationFeeLamports: 100000,
             }),
         })).json();
         // deserialize the transaction
@@ -241,7 +244,7 @@ const getSellTxWithJupiter = (wallet, baseMint, amount) => __awaiter(void 0, voi
                 userPublicKey: wallet.publicKey.toString(),
                 wrapAndUnwrapSol: true,
                 dynamicComputeUnitLimit: true,
-                prioritizationFeeLamports: 52000
+                prioritizationFeeLamports: 52000,
             }),
         })).json();
         // deserialize the transaction

@@ -22,7 +22,8 @@ const swapOnlyAmm_1 = require("./utils/swapOnlyAmm");
 const legacy_1 = require("./executor/legacy");
 const meteoraSwap_1 = require("./utils/meteoraSwap");
 exports.solanaConnection = new web3_js_1.Connection(constants_1.RPC_ENDPOINT, {
-    wsEndpoint: constants_1.RPC_WEBSOCKET_ENDPOINT, commitment: "confirmed"
+    wsEndpoint: constants_1.RPC_WEBSOCKET_ENDPOINT,
+    commitment: "confirmed",
 });
 exports.mainKp = web3_js_1.Keypair.fromSecretKey(bs58_1.default.decode(constants_1.PRIVATE_KEY));
 const baseMint = new web3_js_1.PublicKey(constants_1.TOKEN_MINT);
@@ -82,7 +83,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
                 // sendMessage("Sol balance is not enough in one of wallets")
                 return;
             }
-            let buyAmountFirst = Math.floor((solBalance - 5 * 10 ** 7) / 100 * buyAmountInPercent);
+            let buyAmountFirst = Math.floor(((solBalance - 5 * 10 ** 7) / 100) * buyAmountInPercent);
             let buyAmountSecond = Math.floor(solBalance - buyAmountFirst - 5 * 10 ** 7);
             console.log(`balance: ${solBalance / 10 ** 9} first: ${buyAmountFirst / 10 ** 9} second: ${buyAmountSecond / 10 ** 9}`);
             // sendMessage(`balance: ${solBalance / 10 ** 9} first: ${buyAmountFirst / 10 ** 9} second: ${buyAmountSecond / 10 ** 9}`)
@@ -167,16 +168,21 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
                     const tx = new web3_js_1.Transaction().add(web3_js_1.ComputeBudgetProgram.setComputeUnitLimit({ units: 600000 }), web3_js_1.ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 20000 }), web3_js_1.SystemProgram.transfer({
                         fromPubkey: srcKp.publicKey,
                         toPubkey: destinationKp.publicKey,
-                        lamports: balance - 17000
+                        lamports: balance - 17000,
                     }));
                     tx.feePayer = srcKp.publicKey;
                     tx.recentBlockhash = (yield exports.solanaConnection.getLatestBlockhash()).blockhash;
                     // console.log(await solanaConnection.simulateTransaction(tx))
-                    (0, utils_1.saveDataToFile)([{
+                    (0, utils_1.saveDataToFile)([
+                        {
                             privateKey: bs58_1.default.encode(destinationKp.secretKey),
                             pubkey: destinationKp.publicKey.toBase58(),
-                        }]);
-                    const sig = yield (0, web3_js_1.sendAndConfirmTransaction)(exports.solanaConnection, tx, [srcKp], { skipPreflight: true, commitment: "finalized" });
+                        },
+                    ]);
+                    const sig = yield (0, web3_js_1.sendAndConfirmTransaction)(exports.solanaConnection, tx, [srcKp], {
+                        skipPreflight: true,
+                        commitment: "finalized",
+                    });
                     srcKp = destinationKp;
                     const bal = (yield exports.solanaConnection.getBalance(destinationKp.publicKey)) / 10 ** 9;
                     console.log(bal, "SOL");
@@ -212,7 +218,7 @@ const distributeSol = (connection, mainKp, distritbutionNum) => __awaiter(void 0
             sendSolTx.push(web3_js_1.SystemProgram.transfer({
                 fromPubkey: mainKp.publicKey,
                 toPubkey: wallet.publicKey,
-                lamports: solAmount
+                lamports: solAmount,
             }));
         }
         let index = 0;
@@ -235,7 +241,7 @@ const distributeSol = (connection, mainKp, distritbutionNum) => __awaiter(void 0
                 const transaction = new web3_js_1.VersionedTransaction(messageV0);
                 transaction.sign([mainKp]);
                 const txSig = yield (0, legacy_1.execute)(transaction, latestBlockhash, 1);
-                const distibuteTx = txSig ? `https://solscan.io/tx/${txSig}` : '';
+                const distibuteTx = txSig ? `https://solscan.io/tx/${txSig}` : "";
                 console.log("SOL distributed ", distibuteTx);
                 // sendMessage(`SOL distributed ${distibuteTx}`)
                 break;
@@ -253,8 +259,7 @@ const distributeSol = (connection, mainKp, distritbutionNum) => __awaiter(void 0
         try {
             (0, utils_1.saveDataToFile)(data);
         }
-        catch (error) {
-        }
+        catch (error) { }
         console.log("Success in distribution");
         // sendMessage("Success in distribution")
         return wallets;
@@ -266,7 +271,7 @@ const distributeSol = (connection, mainKp, distritbutionNum) => __awaiter(void 0
     }
 });
 const buy = (newWallet, baseMint, buyAmount) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
+    var _a;
     let solBalance = 0;
     try {
         solBalance = yield exports.solanaConnection.getBalance(newWallet.publicKey);
@@ -303,7 +308,7 @@ const buy = (newWallet, baseMint, buyAmount) => __awaiter(void 0, void 0, void 0
         // console.log(await solanaConnection.simulateTransaction(buyTx))
         const latestBlockhash = yield exports.solanaConnection.getLatestBlockhash();
         const txSig = yield (0, legacy_1.execute)(buyTx, latestBlockhash);
-        const tokenBuyTx = txSig ? `https://solscan.io/tx/${txSig}` : '';
+        const tokenBuyTx = txSig ? `https://solscan.io/tx/${txSig}` : "";
         if (tokenBuyTx) {
             const tokenAta = yield (0, spl_token_1.getAssociatedTokenAddress)(baseMint, newWallet.publicKey);
             const tokenBalInfo = yield exports.solanaConnection.getTokenAccountBalance(tokenAta);
@@ -311,7 +316,7 @@ const buy = (newWallet, baseMint, buyAmount) => __awaiter(void 0, void 0, void 0
                 console.log("Balance incorrect");
                 return null;
             }
-            const tokenBalance = (_b = (tokenBalInfo.value.uiAmount)) === null || _b === void 0 ? void 0 : _b.toFixed(2);
+            const tokenBalance = (_a = tokenBalInfo.value.uiAmount) === null || _a === void 0 ? void 0 : _a.toFixed(2);
             //       sendMessage(`🎉 ${WISH_WORD} ${obfuscateString((newWallet.publicKey).toString())}
             // 💵 Spent: ${(buyAmount / 10 ** 9).toFixed(4)} sol ($${(buyAmount * curSolPrice / 10 ** 9).toFixed(3)})
             // 💎 Got: ${tokenBalance} ${TOKEN_NAME}`)
@@ -366,7 +371,7 @@ const sell = (baseMint, wallet) => __awaiter(void 0, void 0, void 0, function* (
             const beforeBalance = yield exports.solanaConnection.getBalance(wallet.publicKey);
             const latestBlockhashForSell = yield exports.solanaConnection.getLatestBlockhash();
             const txSellSig = yield (0, legacy_1.execute)(sellTx, latestBlockhashForSell, false);
-            const tokenSellTx = txSellSig ? `https://solscan.io/tx/${txSellSig}` : '';
+            const tokenSellTx = txSellSig ? `https://solscan.io/tx/${txSellSig}` : "";
             const afterBalance = yield exports.solanaConnection.getBalance(wallet.publicKey);
             const diffBalance = afterBalance - beforeBalance;
             //       if (tokenSellTx) {

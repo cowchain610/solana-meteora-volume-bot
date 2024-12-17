@@ -1,12 +1,12 @@
-import { Logger } from 'pino';
-import dotenv from 'dotenv';
-import fs from 'fs';
-import { sendMessage } from './tgNotification';
+import { Logger } from "pino";
+import dotenv from "dotenv";
+import fs from "fs";
+import { sendMessage } from "./tgNotification";
 
 dotenv.config();
 
 export const retrieveEnvVariable = (variableName: string, logger: Logger) => {
-  const variable = process.env[variableName] || '';
+  const variable = process.env[variableName] || "";
   if (!variable) {
     console.log(`${variableName} is not set`);
     // sendMessage(`${variableName} is not set`)
@@ -25,8 +25,8 @@ export const randVal = (min: number, max: number, count: number, total: number, 
   const arr: number[] = Array(count).fill(total / count);
   if (isEven) return arr;
 
-  if (max * count < total) throw new Error('Invalid input: max * count must be greater than or equal to total.');
-  if (min * count > total) throw new Error('Invalid input: min * count must be less than or equal to total.');
+  if (max * count < total) throw new Error("Invalid input: max * count must be greater than or equal to total.");
+  if (min * count > total) throw new Error("Invalid input: min * count must be less than or equal to total.");
   const average = total / count;
   // Randomize pairs of elements
   for (let i = 0; i < count; i += 2) {
@@ -40,14 +40,14 @@ export const randVal = (min: number, max: number, count: number, total: number, 
   return arr;
 };
 
-export const saveDataToFile = (newData: Data[], filePath: string = 'data.json') => {
+export const saveDataToFile = (newData: Data[], filePath: string = "data.json") => {
   try {
     let existingData: Data[] = [];
 
     // Check if the file exists
     if (fs.existsSync(filePath)) {
       // If the file exists, read its content
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const fileContent = fs.readFileSync(filePath, "utf-8");
       existingData = JSON.parse(fileContent);
     }
 
@@ -63,9 +63,9 @@ export const saveDataToFile = (newData: Data[], filePath: string = 'data.json') 
         console.log(`File ${filePath} deleted and create new file.`);
       }
       fs.writeFileSync(filePath, JSON.stringify(newData, null, 2));
-      console.log('File is saved successfully.');
+      console.log("File is saved successfully.");
     } catch (error) {
-      console.log('Error saving data to JSON file:', error);
+      console.log("Error saving data to JSON file:", error);
     }
   }
 };
@@ -82,24 +82,24 @@ export function deleteConsoleLines(numLines: number) {
 }
 
 // Function to read JSON file
-export function readJson(filename: string = 'data.json'): Data[] {
+export function readJson(filename: string = "data.json"): Data[] {
   if (!fs.existsSync(filename)) {
     // If the file does not exist, create an empty array
-    fs.writeFileSync(filename, '[]', 'utf-8');
+    fs.writeFileSync(filename, "[]", "utf-8");
   }
-  const data = fs.readFileSync(filename, 'utf-8');
+  const data = fs.readFileSync(filename, "utf-8");
   return JSON.parse(data) as Data[];
 }
 
 // Function to write JSON file
-export function writeJson(data: Data[], filename: string = 'data.json'): void {
-  fs.writeFileSync(filename, JSON.stringify(data, null, 4), 'utf-8');
+export function writeJson(data: Data[], filename: string = "data.json"): void {
+  fs.writeFileSync(filename, JSON.stringify(data, null, 4), "utf-8");
 }
 
 // Function to edit JSON file content
-export function editJson(newData: Partial<Data>, filename: string = 'data.json'): void {
+export function editJson(newData: Partial<Data>, filename: string = "data.json"): void {
   if (!newData.pubkey) {
-    console.log('Pubkey is not provided as an argument');
+    console.log("Pubkey is not provided as an argument");
     return;
   }
   const wallets = readJson(filename);

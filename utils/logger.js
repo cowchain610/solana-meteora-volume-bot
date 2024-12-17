@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.logger = void 0;
 const pino_1 = __importDefault(require("pino"));
 const transport = pino_1.default.transport({
-    target: 'pino-pretty',
+    target: "pino-pretty",
 });
 exports.logger = (0, pino_1.default)({
-    level: 'info',
-    redact: ['poolKeys'],
+    level: "info",
+    redact: ["poolKeys"],
     serializers: {
         error: pino_1.default.stdSerializers.err,
     },

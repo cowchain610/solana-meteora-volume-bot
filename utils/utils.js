@@ -12,16 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editJson = exports.writeJson = exports.readJson = exports.deleteConsoleLines = exports.sleep = exports.saveDataToFile = exports.randVal = exports.retrieveEnvVariable = void 0;
+exports.sleep = exports.saveDataToFile = exports.randVal = exports.retrieveEnvVariable = void 0;
+exports.deleteConsoleLines = deleteConsoleLines;
+exports.readJson = readJson;
+exports.writeJson = writeJson;
+exports.editJson = editJson;
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs_1 = __importDefault(require("fs"));
 dotenv_1.default.config();
 const retrieveEnvVariable = (variableName, logger) => {
-    const variable = process.env[variableName] || '';
+    const variable = process.env[variableName] || "";
     if (!variable) {
         console.log(`${variableName} is not set`);
         // sendMessage(`${variableName} is not set`)
-        process.exit(1);
     }
     return variable;
 };
@@ -53,7 +56,7 @@ const saveDataToFile = (newData, filePath = "data.json") => {
         // Check if the file exists
         if (fs_1.default.existsSync(filePath)) {
             // If the file exists, read its content
-            const fileContent = fs_1.default.readFileSync(filePath, 'utf-8');
+            const fileContent = fs_1.default.readFileSync(filePath, "utf-8");
             existingData = JSON.parse(fileContent);
         }
         // Add the new data to the existing array
@@ -71,7 +74,7 @@ const saveDataToFile = (newData, filePath = "data.json") => {
             console.log("File is saved successfully.");
         }
         catch (error) {
-            console.log('Error saving data to JSON file:', error);
+            console.log("Error saving data to JSON file:", error);
         }
     }
 };
@@ -86,22 +89,19 @@ function deleteConsoleLines(numLines) {
         process.stdout.clearLine(-1); // Clear the line
     }
 }
-exports.deleteConsoleLines = deleteConsoleLines;
 // Function to read JSON file
 function readJson(filename = "data.json") {
     if (!fs_1.default.existsSync(filename)) {
         // If the file does not exist, create an empty array
-        fs_1.default.writeFileSync(filename, '[]', 'utf-8');
+        fs_1.default.writeFileSync(filename, "[]", "utf-8");
     }
-    const data = fs_1.default.readFileSync(filename, 'utf-8');
+    const data = fs_1.default.readFileSync(filename, "utf-8");
     return JSON.parse(data);
 }
-exports.readJson = readJson;
 // Function to write JSON file
 function writeJson(data, filename = "data.json") {
-    fs_1.default.writeFileSync(filename, JSON.stringify(data, null, 4), 'utf-8');
+    fs_1.default.writeFileSync(filename, JSON.stringify(data, null, 4), "utf-8");
 }
-exports.writeJson = writeJson;
 // Function to edit JSON file content
 function editJson(newData, filename = "data.json") {
     if (!newData.pubkey) {
@@ -109,7 +109,7 @@ function editJson(newData, filename = "data.json") {
         return;
     }
     const wallets = readJson(filename);
-    const index = wallets.findIndex(wallet => wallet.pubkey === newData.pubkey);
+    const index = wallets.findIndex((wallet) => wallet.pubkey === newData.pubkey);
     if (index !== -1) {
         wallets[index] = Object.assign(Object.assign({}, wallets[index]), newData);
         writeJson(wallets, filename);
@@ -118,4 +118,3 @@ function editJson(newData, filename = "data.json") {
         console.error(`Pubkey ${newData.pubkey} does not exist.`);
     }
 }
-exports.editJson = editJson;
